@@ -2,10 +2,12 @@
 const http = require('http');
 const socketIo = require('socket.io');
 
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const connectDB = require('./config/db.js');
 const userRouter = require('./Routes/UserRouter.js');
 const UserModel = require('./Models/UserModels.js');
@@ -47,7 +49,8 @@ io.on("connection", (socket) => {
     console.log("User joined room", roomId)
   })
 
-  socket.on('newMessage', async (roomId, user, content) => {
+  socket.on('newMessage', async (roomId, user, content, file) => {
+
     console.log("newMessage", roomId, user, content)
     const room = await RoomModel.findById(roomId);
     if (!room) {
@@ -58,17 +61,25 @@ io.on("connection", (socket) => {
     if (!sender) {
       return console.log(`user with id ${user} not found`)
     }
-
-    const newMessage = { user, content }
+    if (file) {
+      var new_file = {
+        data: file,
+        filename: "files" + new Date().getMilliseconds(),
+        contentType: "pdf"
+      };
+    }
+    const newMessage = { user, content, file: new_file }
+    console.log("File Data:", file);
+    console.log("New Message:", newMessage);
+    console.log("Room:", room);
 
     room.messages.push(newMessage);
     await room.save();
-
     const message = {
       user: sender.username,
       content,
+      file: new_file
     }
-
     io.to(roomId).emit("updateMessages", message);
   })
 
