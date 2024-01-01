@@ -27,6 +27,13 @@ const roomSchema = new mongoose.Schema({
                 type: Date,
                 default: Date.now,
             },
+            file: {
+                data: Buffer, // Store file data as Buffer (blob)
+                filename: String,
+                required:false,
+                contentType: String, // Add content type if needed
+                // You can add more fields like file size, file type, etc.
+            },
         },
     ],
     timestamp: {
