@@ -46,5 +46,16 @@ const getUserRooms = asyncHandler(async (req, res) => {
 
     return res.status(200).json(rooms)
 })
+const getRoomParticipants = asyncHandler(async (req, res) => {
+    const { id: roomId } = req.params
+    if (!roomId) {
+        return res.status(404).json({ message: "Room not found" })
+    }
+    const room_participants = await Room.findById(roomId).populate({path:'users',select:'username'});
+    if (!room_participants) {
+        return res.status(404).json({ message: "Room not found" })
+    }
+    return res.status(200).json(room_participants)
+})
 
-module.exports = { getRoom, addRoom, getUserRooms }
+module.exports = { getRoom, addRoom, getUserRooms,getRoomParticipants }
